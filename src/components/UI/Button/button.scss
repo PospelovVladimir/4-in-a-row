@@ -1,0 +1,30 @@
+.btn {
+  cursor: pointer;
+  border: none;
+  padding: 7px 15px;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &_primary {
+    background-color: #18a6f8;
+    color: #fff;
+  }
+
+  &_secondary {
+    background-color: #1acf84;
+    color: #fff;
+  }
+
+  &_danger {
+    background-color: #f89718;
+    color: #fff;
+  }
+
+  &_remove {
+    background-color: #f82018;
+    color: #fff;
+  }
+}
