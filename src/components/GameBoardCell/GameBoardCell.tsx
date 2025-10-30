@@ -6,15 +6,10 @@ import GameCell from "../GameCell/GameCell"
 type TGameBoardCell = {
   columnIndex: number
   cellVariant: TVariantCell | null
-  handlerClick: (columnIndex: number) => void
 }
 
-const GameBoardCell: FC<TGameBoardCell> = memo(({ columnIndex, cellVariant, handlerClick }) => {
-  return (
-    <div className="game-board-cell" onClick={() => handlerClick(columnIndex)}>
-      {cellVariant && <GameCell variant={cellVariant as TVariantCell} />}
-    </div>
-  )
+const GameBoardCell: FC<TGameBoardCell> = memo(({ cellVariant }) => {
+  return <div className="game-board-cell">{cellVariant && <GameCell variant={cellVariant as TVariantCell} />}</div>
 })
 
 export default GameBoardCell

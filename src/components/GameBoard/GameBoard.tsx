@@ -62,30 +62,33 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
     }
   }
 
-  const handlerColumnClick = useCallback((column: number) => {
-    if (fallingStone !== null) return
+  const handleBoardClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (fallingStone !== null) return
 
-    const colors: TVariantCell[] = ["red", "blue", "green", "violet"]
-    const randomColor = colors[Math.floor(Math.random() * colors.length)]
+      const boardRect = e.currentTarget.getBoundingClientRect()
+      const clickX = e.clientX - boardRect.left
 
-    placeStone(column, randomColor)
-  }, [])
+      // Вычисляем, в какой столбец был клик
+      const clickedColumn = Math.floor(clickX / 100) // 100px - ширина ячейки
+
+      // Проверяем, что клик был в пределах допустимых столбцов
+      if (clickedColumn >= 0 && clickedColumn < columns) {
+        const colors: TVariantCell[] = ["red", "blue", "green", "violet"]
+        const randomColor = colors[Math.floor(Math.random() * colors.length)]
+        placeStone(clickedColumn, randomColor)
+      }
+    },
+    [placeStone, columns, fallingStone]
+  )
 
   return (
-    <div className="game-board">
+    <div className="game-board" onClick={handleBoardClick}>
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div className="game-board__row" key={rowIndex}>
           {Array.from({ length: columns }).map((_, columnIndex) => {
             const cellVariant = grid[rowIndex][columnIndex]
-
-            return (
-              <GameBoardCell
-                key={`${rowIndex}-${columnIndex}`}
-                columnIndex={columnIndex}
-                cellVariant={cellVariant}
-                handlerClick={handlerColumnClick}
-              />
-            )
+            return <GameBoardCell key={`${rowIndex}-${columnIndex}`} columnIndex={columnIndex} cellVariant={cellVariant} />
           })}
         </div>
       ))}
