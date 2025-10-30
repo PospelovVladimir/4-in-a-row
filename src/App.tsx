@@ -1,7 +1,8 @@
-import "./App.css"
+import "./App.scss"
+import GameBoard from "./components/GameBoard/GameBoard"
 
 const App = () => {
-  return <div>app</div>
+  return <div className="app"><GameBoard></GameBoard></div>
 }
 
 export default App

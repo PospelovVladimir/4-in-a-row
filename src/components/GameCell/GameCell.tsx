@@ -1,7 +1,7 @@
 import "./gameCell.scss"
 import { useState, type FC, useEffect } from "react"
 
-type TVariantCell = "red" | "blue" | "green" | "violet"
+export type TVariantCell = "red" | "blue" | "green" | "violet"
 
 type TGameCell = {
   variant: TVariantCell
@@ -31,6 +31,7 @@ const GameCell: FC<TGameCell> = ({ variant }) => {
 
   return (
     <div className="game-cell">
+      <span className="game-cell__flare"></span>
       <img className="game-cell__img" src={stone} />
     </div>
   )
