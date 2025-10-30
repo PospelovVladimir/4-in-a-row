@@ -1,0 +1,35 @@
+.game-board {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+  height: 600px;
+  position: relative;
+  transform-style: preserve-3d;
+
+  &__row {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    position: relative;
+    height: 100px;
+  }
+
+  &__falling-stone {
+    position: absolute;
+    animation: BingoMove 0.7s;
+  }
+}
+
+@keyframes BingoMove {
+  0% {
+    opacity: 0;
+    transform: rotate(0deg) translateX(-50%);
+  }
+  50% {
+    transform: rotate(180deg) translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(360deg) translateX(-50%);
+  }
+}

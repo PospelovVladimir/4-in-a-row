@@ -1,7 +1,109 @@
+import { useState, type FC, useCallback } from "react"
 import "./gameBoard.scss"
+import type { TVariantCell } from "../GameCell/GameCell"
+import GameCell from "../GameCell/GameCell"
+import GameBoardCell from "../GameBoardCell/GameBoardCell"
 
-const GameBoard = () => {
-  return <div className="game-board">GameBoard</div>
+type TGameBoardProps = {
+  rows?: number // Количество рядов
+  columns?: number // Количество колонок
+}
+
+const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
+  const [grid, setGrid] = useState<(TVariantCell | null)[][]>(Array.from({ length: rows }, () => Array(columns).fill(null)))
+
+  const [fallingStone, setFallingStone] = useState<{ column: number; color: TVariantCell } | null>(null)
+  const [fallingPosition, setFallingPosition] = useState<number | null>(null)
+
+  const placeStone = (column: number, variant: TVariantCell) => {
+    const newGrid = [...grid]
+
+    // Определяем конечную строку для падения, учитывая наличие фишек в столбце
+    let finalRow: number | null = null
+
+    for (let row = 0; row < rows; row++) {
+      if (newGrid[row][column] === null) {
+        finalRow = row // Находим первую доступную ячейку для добавления фишки
+      } else {
+        break // Если ячейка занята, прекращаем поиск
+      }
+    }
+
+    if (finalRow !== null) {
+      setFallingStone({ column, color: variant })
+      setFallingPosition(-100) // Начинаем выше экрана
+
+      const targetPosition = finalRow * 100 // Вычисляем точную целевую позицию
+
+      // Используйте requestAnimationFrame:
+      let animationFrameId: number
+
+      const animateDrop = () => {
+        setFallingPosition((prev) => {
+          if (prev === null) return 0
+
+          const newPosition = prev + 15 // Двигаем вниз на 15 пикселей
+
+          // останавливай анимацию. конечная позиция === с полетом камня
+          if (newPosition >= targetPosition) {
+            cancelAnimationFrame(animationFrameId) // Останавливаем анимацию
+            newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
+            setGrid(newGrid)
+            setFallingStone(null) // Сбрасываем падающую фишку
+            return null // Убираем позицию
+          }
+          return newPosition
+        })
+
+        animationFrameId = requestAnimationFrame(animateDrop)
+      }
+
+      animationFrameId = requestAnimationFrame(animateDrop) // Запускаем анимацию
+    }
+  }
+
+  const handlerColumnClick = useCallback((column: number) => {
+    if (fallingStone !== null) return
+
+    const colors: TVariantCell[] = ["red", "blue", "green", "violet"]
+    const randomColor = colors[Math.floor(Math.random() * colors.length)]
+
+    placeStone(column, randomColor)
+  }, [])
+
+  return (
+    <div className="game-board">
+      {Array.from({ length: rows }).map((_, rowIndex) => (
+        <div className="game-board__row" key={rowIndex}>
+          {Array.from({ length: columns }).map((_, columnIndex) => {
+            const cellVariant = grid[rowIndex][columnIndex]
+
+            return (
+              <GameBoardCell
+                key={`${rowIndex}-${columnIndex}`}
+                columnIndex={columnIndex}
+                cellVariant={cellVariant}
+                handlerClick={handlerColumnClick}
+              />
+            )
+          })}
+        </div>
+      ))}
+
+      {/* Падающая фишка */}
+      {fallingStone && (
+        <div
+          className="game-board__falling-stone"
+          style={{
+            top: fallingPosition !== null ? `${fallingPosition}px` : "-100px", // Начальная позиция выше экрана
+            left: `${fallingStone.column * 100 + 50}px`, // Центрирование фишки над столбцом (50px - половина ширины ячейки)
+          }}
+        >
+          <GameCell variant={fallingStone.color} />
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default GameBoard
