@@ -3,6 +3,7 @@ import "./gameBoard.scss"
 import type { TVariantCell } from "../GameCell/GameCell"
 import GameCell from "../GameCell/GameCell"
 import GameBoardCell from "../GameBoardCell/GameBoardCell"
+import { GAME_BOARD_CELL_WIDTH, GAME_BOARD_FALLING_POSITION_STEP, GAME_BOARD_START_FALLING_POSITION } from "../../config"
 
 type TGameBoardProps = {
   rows?: number // Количество рядов
@@ -31,9 +32,9 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
 
     if (finalRow !== null) {
       setFallingStone({ column, color: variant })
-      setFallingPosition(-100) // Начинаем выше экрана
+      setFallingPosition(GAME_BOARD_START_FALLING_POSITION) // Начинаем выше экрана
 
-      const targetPosition = finalRow * 100 // Вычисляем точную целевую позицию
+      const targetPosition = finalRow * GAME_BOARD_CELL_WIDTH // Вычисляем точную целевую позицию
 
       // Используйте requestAnimationFrame:
       let animationFrameId: number
@@ -42,7 +43,7 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
         setFallingPosition((prev) => {
           if (prev === null) return 0
 
-          const newPosition = prev + 15 // Двигаем вниз на 15 пикселей
+          const newPosition = prev + GAME_BOARD_FALLING_POSITION_STEP // Двигаем вниз на 15 пикселей
 
           // останавливай анимацию. конечная позиция === с полетом камня
           if (newPosition >= targetPosition) {
@@ -70,7 +71,7 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
       const clickX = e.clientX - boardRect.left
 
       // Вычисляем, в какой столбец был клик
-      const clickedColumn = Math.floor(clickX / 100) // 100px - ширина ячейки
+      const clickedColumn = Math.floor(clickX / GAME_BOARD_CELL_WIDTH) // GAME_BOARD_CELL_WIDTH - ширина ячейки
 
       // Проверяем, что клик был в пределах допустимых столбцов
       if (clickedColumn >= 0 && clickedColumn < columns) {
@@ -98,8 +99,8 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
         <div
           className="game-board__falling-stone"
           style={{
-            top: fallingPosition !== null ? `${fallingPosition}px` : "-100px", // Начальная позиция выше экрана
-            left: `${fallingStone.column * 100 + 50}px`, // Центрирование фишки над столбцом (50px - половина ширины ячейки)
+            top: fallingPosition !== null ? `${fallingPosition}px` : `-${GAME_BOARD_START_FALLING_POSITION}px`, // Начальная позиция выше экрана
+            left: `${fallingStone.column * GAME_BOARD_CELL_WIDTH + GAME_BOARD_CELL_WIDTH / 2}px`, // Центрирование фишки над столбцом (50px - половина ширины ячейки)
           }}
         >
           <GameCell variant={fallingStone.color} />

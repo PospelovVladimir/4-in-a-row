@@ -10,7 +10,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 720px;
+  /* width: 720px; */
   padding: 10px;
   background-color: #994e41;
   box-shadow: inset 0px 0px 5px #e57d62;
