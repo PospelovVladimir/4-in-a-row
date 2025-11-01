@@ -1,4 +1,4 @@
-import { useState, type FC, useCallback } from "react"
+import { useState, type FC, useCallback, useEffect } from "react"
 import "./gameBoard.scss"
 import type { TVariantCell } from "../GameCell/GameCell"
 import GameCell from "../GameCell/GameCell"
@@ -8,13 +8,20 @@ import { GAME_BOARD_CELL_WIDTH, GAME_BOARD_FALLING_POSITION_STEP, GAME_BOARD_STA
 type TGameBoardProps = {
   rows?: number // Количество рядов
   columns?: number // Количество колонок
+  isGameActive: boolean
 }
 
-const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
+const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive }) => {
   const [grid, setGrid] = useState<(TVariantCell | null)[][]>(Array.from({ length: rows }, () => Array(columns).fill(null)))
 
   const [fallingStone, setFallingStone] = useState<{ column: number; color: TVariantCell } | null>(null)
   const [fallingPosition, setFallingPosition] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!isGameActive) {
+      setGrid(Array.from({ length: rows }, () => Array(columns).fill(null)))
+    }
+  }, [isGameActive])
 
   const placeStone = (column: number, variant: TVariantCell) => {
     const newGrid = [...grid]
@@ -65,7 +72,7 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
 
   const handleBoardClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (fallingStone !== null) return
+      if (!isGameActive || fallingStone !== null) return
 
       const boardRect = e.currentTarget.getBoundingClientRect()
       const clickX = e.clientX - boardRect.left
@@ -84,7 +91,7 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7 }) => {
   )
 
   return (
-    <div className="game-board" onClick={handleBoardClick}>
+    <div className="game-board" onClick={handleBoardClick} style={{ opacity: isGameActive ? "1" : "0.7" }}>
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div className="game-board__row" key={rowIndex}>
           {Array.from({ length: columns }).map((_, columnIndex) => {
