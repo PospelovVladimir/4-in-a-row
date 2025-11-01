@@ -16,6 +16,8 @@
 
   &__falling-stone {
     position: absolute;
+    width: 100px;
+    height: 100px;
     animation: BingoMove 0.7s;
   }
 }

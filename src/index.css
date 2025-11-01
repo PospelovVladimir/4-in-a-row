@@ -1,6 +1,8 @@
 body {
   width: 100vw;
   height: 100vh;
+  /* font-family: "Permanent Marker", cursive; */
+  font-family: "Averia Libre", system-ui;
 }
 
 .container {
@@ -8,5 +10,9 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 700px;
+  width: 720px;
+  padding: 10px;
+  background-color: #994e41;
+  box-shadow: inset 0px 0px 5px #e57d62;
+  border: 1px solid rgb(216 111 91);
 }

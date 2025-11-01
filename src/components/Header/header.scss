@@ -1,5 +1,98 @@
 .header {
   width: 100%;
-  height: 50px;
-  background-color: #eb6f49;
+  height: 150px;
+  background: #363636;
+  // padding: 10px;
+  // background-color: #783328;
+
+  &__wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    align-items: center;
+    height: 100%;
+    background: radial-gradient(#594858, #463b4b);
+    // background: url("../../assets/images/header-border-bg-in.jpg") repeat center;
+    background-size: contain;
+  }
+
+  &__left {
+  }
+
+  &__center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+  }
+
+  // &__center-top {
+  //   @extend .header__center;
+  //   gap: 10px;
+  // }
+
+  &__text {
+    font-size: 20px;
+  }
+
+  &__chip-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+
+  &__chip-list-item {
+    width: 43px;
+    height: 43px;
+    // border-bottom: 2px solid transparent;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+
+    &.active {
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 100%;
+        height: 2px;
+      }
+    }
+
+    &.active[data-color="blue"] {
+      &::after {
+        background-color: #0082cd;
+      }
+    }
+
+    &.active[data-color="green"] {
+      &::after {
+        background-color: #2b7961;
+      }
+    }
+
+    &.active[data-color="red"] {
+      &::after {
+        background-color: #c02b48;
+      }
+    }
+
+    &.active[data-color="violet"] {
+      &::after {
+        background-color: #9d3dd2;
+      }
+    }
+  }
+
+  &__center-bottom {
+  }
+
+  &__right {
+  }
 }
