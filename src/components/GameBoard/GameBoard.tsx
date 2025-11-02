@@ -4,18 +4,28 @@ import type { TVariantCell } from "../GameCell/GameCell"
 import GameCell from "../GameCell/GameCell"
 import GameBoardCell from "../GameBoardCell/GameBoardCell"
 import { GAME_BOARD_CELL_WIDTH, GAME_BOARD_FALLING_POSITION_STEP, GAME_BOARD_START_FALLING_POSITION } from "../../config"
+import type { TPlayers } from "../../types"
 
 type TGameBoardProps = {
   rows?: number // Количество рядов
   columns?: number // Количество колонок
   isGameActive: boolean
+  chooseChips: TPlayers
 }
 
-const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive }) => {
-  const [grid, setGrid] = useState<(TVariantCell | null)[][]>(Array.from({ length: rows }, () => Array(columns).fill(null)))
+type TCurrentPlayersMove = {
+  player1: boolean
+  player2: boolean
+}
 
+const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive, chooseChips }) => {
+  const [grid, setGrid] = useState<(TVariantCell | null)[][]>(Array.from({ length: rows }, () => Array(columns).fill(null)))
   const [fallingStone, setFallingStone] = useState<{ column: number; color: TVariantCell } | null>(null)
   const [fallingPosition, setFallingPosition] = useState<number | null>(null)
+  const [currentPlayersMove, setCurrentPlayersMove] = useState<TCurrentPlayersMove>({
+    player1: true,
+    player2: false,
+  })
 
   useEffect(() => {
     if (!isGameActive) {
@@ -82,9 +92,19 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive })
 
       // Проверяем, что клик был в пределах допустимых столбцов
       if (clickedColumn >= 0 && clickedColumn < columns) {
-        const colors: TVariantCell[] = ["red", "blue", "green", "violet"]
-        const randomColor = colors[Math.floor(Math.random() * colors.length)]
-        placeStone(clickedColumn, randomColor)
+        // const colors: TVariantCell[] = ["red", "blue", "green", "violet"]
+        // const randomColor = colors[Math.floor(Math.random() * colors.length)]
+        // placeStone(clickedColumn, randomColor)
+
+        if (currentPlayersMove.player1 && chooseChips.player1) {
+          placeStone(clickedColumn, chooseChips.player1)
+          setCurrentPlayersMove({ ...currentPlayersMove, player1: false, player2: true })
+        }
+
+        if (currentPlayersMove.player2 && chooseChips.player2) {
+          placeStone(clickedColumn, chooseChips.player2)
+          setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
+        }
       }
     },
     [placeStone, columns, fallingStone]

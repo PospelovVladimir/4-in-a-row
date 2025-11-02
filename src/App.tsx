@@ -3,16 +3,17 @@ import "./App.scss"
 import GameBoard from "./components/GameBoard/GameBoard"
 import HeaderWithHero from "./components/HeaderWithHero/HeaderWithHero"
 import type { TVariantCell } from "./components/GameCell/GameCell"
+import { chooseChipExcludingSelected } from "./utils"
+import type { TPlayers } from "./types"
 
 const App = () => {
   const [isGameActive, setIsGameActive] = useState(false)
-  const [chooseChip, setChooseChip] = useState<TVariantCell | null>(null)
-  const [currentPlayer, setCurrentPlayer] = useState(false)
+  const [chooseChips, setChooseChips] = useState<TPlayers>({ player1: null, player2: null })
 
   /* 
   
   TODO
-  - добавить функцию выбора фишки компьютером после выбора фишки игроком
+  + добавить функцию выбора фишки компьютером после выбора фишки игроком
   - передавать выбранные фишки в гейм поле (1 фишка это игрок)
   - убрать генерацию фишек рандомно с игрового поля
   - добавить алгоритм хода компьютером после хода игрока (возможно с задержкой)
@@ -23,33 +24,34 @@ const App = () => {
   */
 
   const gameActiveHandler = () => {
-    if (!chooseChip && !isGameActive) return
+    if (!chooseChips.player1 && !isGameActive) return
 
-    if (chooseChip && !isGameActive) {
+    if (chooseChips.player1 && !isGameActive) {
       setIsGameActive(true)
     }
 
-    if (chooseChip && isGameActive) {
+    if (chooseChips.player1 && isGameActive) {
       setIsGameActive(false)
-      setChooseChip(null)
+      setChooseChips({ player1: null, player2: null })
     }
   }
 
   const chooseChipHandler = (vatiant: TVariantCell) => {
-    if (chooseChip && isGameActive) return
-    setChooseChip(vatiant)
+    if (chooseChips.player1 && isGameActive) return
+    const colors: TVariantCell[] = ["red", "blue", "green", "violet"]
+    setChooseChips({ ...chooseChips, player1: vatiant, player2: chooseChipExcludingSelected(colors, vatiant) })
   }
 
   return (
     <div className="app">
       <div className="container">
         <HeaderWithHero
-          chooseChip={chooseChip}
+          chooseChip={chooseChips.player1}
           isGameActive={isGameActive}
           chooseChipHandler={chooseChipHandler}
           gameActiveHandler={gameActiveHandler}
         />
-        <GameBoard isGameActive={isGameActive} />
+        <GameBoard isGameActive={isGameActive} chooseChips={chooseChips} />
       </div>
     </div>
   )
