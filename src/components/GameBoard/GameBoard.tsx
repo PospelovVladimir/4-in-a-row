@@ -12,6 +12,8 @@ type TGameBoardProps = {
   isGameActive: boolean
   chooseChips: TPlayers
   isVsComputer: boolean
+  boardState: TGameBoardState
+  setBoardStateHandler: (state: TGameBoardState) => void
 }
 
 type TCurrentPlayersMove = {
@@ -19,7 +21,17 @@ type TCurrentPlayersMove = {
   player2: boolean
 }
 
-const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive, chooseChips, isVsComputer }) => {
+export type TGameBoardState = "waiting" | "pending" | "win" | "draw"
+
+const GameBoard: FC<TGameBoardProps> = ({
+  rows = 6,
+  columns = 7,
+  isGameActive,
+  chooseChips,
+  isVsComputer,
+  boardState,
+  setBoardStateHandler,
+}) => {
   const [grid, setGrid] = useState<(TVariantCell | null)[][]>(Array.from({ length: rows }, () => Array(columns).fill(null)))
   const [fallingStone, setFallingStone] = useState<{ column: number; color: TVariantCell } | null>(null)
   const [fallingPosition, setFallingPosition] = useState<number | null>(null)
@@ -83,7 +95,7 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive, c
 
   const handlerBoardClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!isGameActive || fallingStone !== null) return
+      if (!isGameActive || boardState === "waiting" || boardState === "win" || boardState === "draw" || fallingStone !== null) return
 
       const target = e.target as HTMLElement
       const gameBoardCellEl = target.closest(".game-board-cell")
@@ -108,42 +120,51 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive, c
         setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
       }
     },
-    [isGameActive, placeStone, columns, fallingStone, currentPlayersMove, chooseChips]
+    [isGameActive, boardState, placeStone, columns, fallingStone, currentPlayersMove, chooseChips]
   )
 
   const makeComputerMove = useCallback(() => {
-    if (isGameActive && fallingStone === null && currentPlayersMove.player2 && isVsComputer) {
-      console.log("pc")
+    if (
+      !isGameActive ||
+      boardState === "waiting" ||
+      boardState === "win" ||
+      boardState === "draw" ||
+      fallingStone !== null ||
+      !currentPlayersMove.player2 ||
+      !isVsComputer
+    )
+      return
 
-      // Задержка перед ходом компьютера
-      setTimeout(() => {
-        // Выбираем случайный столбец
-        let randomColumn: number
-        do {
-          randomColumn = Math.floor(Math.random() * columns)
-        } while (grid[0][randomColumn] !== null) // Проверяем, что столбец не заполнен
+    console.log("pc")
 
-        // Если столбец заполнен, попробуем еще раз (ограничим количество попыток, чтобы избежать бесконечного цикла)
-        let attempts = 0
-        while (grid[0][randomColumn] !== null && attempts < 10) {
-          randomColumn = Math.floor(Math.random() * columns)
-          attempts++
-        }
+    // Задержка перед ходом компьютера
+    setTimeout(() => {
+      // Выбираем случайный столбец
+      let randomColumn: number
+      do {
+        randomColumn = Math.floor(Math.random() * columns)
+      } while (grid[0][randomColumn] !== null) // Проверяем, что столбец не заполнен
 
-        // Если не удалось найти свободный столбец после нескольких попыток, прекращаем
-        if (grid[0][randomColumn] !== null) {
-          console.warn("Не удалось найти свободный столбец для компьютера")
-          return
-        }
+      // Если столбец заполнен, попробуем еще раз (ограничим количество попыток, чтобы избежать бесконечного цикла)
+      let attempts = 0
+      while (grid[0][randomColumn] !== null && attempts < 10) {
+        randomColumn = Math.floor(Math.random() * columns)
+        attempts++
+      }
 
-        // Ставим фишку в выбранный столбец
-        if (chooseChips.player2) {
-          placeStone(randomColumn, chooseChips.player2)
-          setCurrentPlayersMove((prev) => ({ ...prev, player1: true, player2: false }))
-        }
-      }, 500) // Задержка в 500 миллисекунд (0.5 секунды)
-    }
-  }, [isGameActive, fallingStone, currentPlayersMove, chooseChips, placeStone, columns, grid, isVsComputer])
+      // Если не удалось найти свободный столбец после нескольких попыток, прекращаем
+      if (grid[0][randomColumn] !== null) {
+        console.warn("Не удалось найти свободный столбец для компьютера")
+        return
+      }
+
+      // Ставим фишку в выбранный столбец
+      if (chooseChips.player2) {
+        placeStone(randomColumn, chooseChips.player2)
+        setCurrentPlayersMove((prev) => ({ ...prev, player1: true, player2: false }))
+      }
+    }, 500) // Задержка в 500 миллисекунд (0.5 секунды)
+  }, [isGameActive, boardState, fallingStone, currentPlayersMove, chooseChips, placeStone, columns, grid, isVsComputer])
 
   useEffect(() => {
     makeComputerMove()

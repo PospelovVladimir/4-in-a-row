@@ -1,6 +1,6 @@
 import { useState } from "react"
 import "./App.scss"
-import GameBoard from "./components/GameBoard/GameBoard"
+import GameBoard, { type TGameBoardState } from "./components/GameBoard/GameBoard"
 import HeaderWithHero from "./components/HeaderWithHero/HeaderWithHero"
 import type { TVariantCell } from "./components/GameCell/GameCell"
 import { chooseChipExcludingSelected } from "./utils"
@@ -10,6 +10,16 @@ const App = () => {
   const [isGameActive, setIsGameActive] = useState(false)
   const [chooseChips, setChooseChips] = useState<TPlayers>({ player1: null, player2: null })
   const [isVsComputer, setIsVsComputer] = useState(true)
+  /*  
+  'waiting' игра не началась, 
+  'pending', игра в процессе, 
+  'win', есть победа какого-то игрока, 
+  'draw',  ничья. */
+  const [boardState, setBoardState] = useState<TGameBoardState>("waiting")
+
+  const setBoardStateHandler = (state: TGameBoardState) => {
+    setBoardState(state)
+  }
 
   /* 
   
@@ -29,10 +39,12 @@ const App = () => {
 
     if (chooseChips.player1 && !isGameActive) {
       setIsGameActive(true)
+      setBoardState("pending")
     }
 
     if (chooseChips.player1 && isGameActive) {
       setIsGameActive(false)
+      setBoardState("waiting")
       setChooseChips({ player1: null, player2: null })
     }
   }
@@ -52,7 +64,13 @@ const App = () => {
           chooseChipHandler={chooseChipHandler}
           gameActiveHandler={gameActiveHandler}
         />
-        <GameBoard isGameActive={isGameActive} chooseChips={chooseChips} isVsComputer={isVsComputer} />
+        <GameBoard
+          isGameActive={isGameActive}
+          chooseChips={chooseChips}
+          isVsComputer={isVsComputer}
+          boardState={boardState}
+          setBoardStateHandler={setBoardStateHandler}
+        />
       </div>
     </div>
   )
