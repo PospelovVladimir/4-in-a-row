@@ -80,38 +80,36 @@ const GameBoard: FC<TGameBoardProps> = ({ rows = 6, columns = 7, isGameActive, c
     }
   }
 
-  const handleBoardClick = useCallback(
+  const handlerBoardClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!isGameActive || fallingStone !== null) return
 
-      const boardRect = e.currentTarget.getBoundingClientRect()
-      const clickX = e.clientX - boardRect.left
+      const target = e.target as HTMLElement
+      const gameBoardCellEl = target.closest(".game-board-cell")
 
-      // Вычисляем, в какой столбец был клик
-      const clickedColumn = Math.floor(clickX / GAME_BOARD_CELL_WIDTH) // GAME_BOARD_CELL_WIDTH - ширина ячейки
+      if (!gameBoardCellEl) return
 
-      // Проверяем, что клик был в пределах допустимых столбцов
-      if (clickedColumn >= 0 && clickedColumn < columns) {
-        // const colors: TVariantCell[] = ["red", "blue", "green", "violet"]
-        // const randomColor = colors[Math.floor(Math.random() * colors.length)]
-        // placeStone(clickedColumn, randomColor)
+      const columnIndex = gameBoardCellEl.getAttribute("data-column-index")
 
-        if (currentPlayersMove.player1 && chooseChips.player1) {
-          placeStone(clickedColumn, chooseChips.player1)
-          setCurrentPlayersMove({ ...currentPlayersMove, player1: false, player2: true })
-        }
+      if (columnIndex === null) return
 
-        if (currentPlayersMove.player2 && chooseChips.player2) {
-          placeStone(clickedColumn, chooseChips.player2)
-          setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
-        }
+      const clickedColumn = +columnIndex
+
+      if (isNaN(clickedColumn) || clickedColumn < 0 || clickedColumn >= columns) return
+
+      if (currentPlayersMove.player1 && chooseChips.player1) {
+        placeStone(clickedColumn, chooseChips.player1)
+        setCurrentPlayersMove({ ...currentPlayersMove, player1: false, player2: true })
+      } else if (currentPlayersMove.player2 && chooseChips.player2) {
+        placeStone(clickedColumn, chooseChips.player2)
+        setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
       }
     },
-    [placeStone, columns, fallingStone]
+    [isGameActive, placeStone, columns, fallingStone, currentPlayersMove, chooseChips]
   )
 
   return (
-    <div className="game-board" onClick={handleBoardClick} style={{ opacity: isGameActive ? "1" : "0.7" }}>
+    <div className="game-board" onClick={handlerBoardClick} style={{ opacity: isGameActive ? "1" : "0.7" }}>
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div className="game-board__row" key={rowIndex}>
           {Array.from({ length: columns }).map((_, columnIndex) => {

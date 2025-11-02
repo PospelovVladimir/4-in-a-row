@@ -8,8 +8,12 @@ type TGameBoardCell = {
   cellVariant: TVariantCell | null
 }
 
-const GameBoardCell: FC<TGameBoardCell> = memo(({ cellVariant }) => {
-  return <div className="game-board-cell">{cellVariant && <GameCell variant={cellVariant as TVariantCell} />}</div>
+const GameBoardCell: FC<TGameBoardCell> = memo(({ cellVariant, columnIndex }) => {
+  return (
+    <div className="game-board-cell" data-column-index={columnIndex}>
+      {cellVariant && <GameCell variant={cellVariant as TVariantCell} />}
+    </div>
+  )
 })
 
 export default GameBoardCell
