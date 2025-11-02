@@ -9,6 +9,7 @@ import type { TPlayers } from "./types"
 const App = () => {
   const [isGameActive, setIsGameActive] = useState(false)
   const [chooseChips, setChooseChips] = useState<TPlayers>({ player1: null, player2: null })
+  const [isVsComputer, setIsVsComputer] = useState(true)
 
   /* 
   
@@ -51,7 +52,7 @@ const App = () => {
           chooseChipHandler={chooseChipHandler}
           gameActiveHandler={gameActiveHandler}
         />
-        <GameBoard isGameActive={isGameActive} chooseChips={chooseChips} />
+        <GameBoard isGameActive={isGameActive} chooseChips={chooseChips} isVsComputer={isVsComputer} />
       </div>
     </div>
   )
