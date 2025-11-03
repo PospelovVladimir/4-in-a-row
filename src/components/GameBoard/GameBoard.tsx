@@ -5,6 +5,7 @@ import GameCell from "../GameCell/GameCell"
 import GameBoardCell from "../GameBoardCell/GameBoardCell"
 import { GAME_BOARD_CELL_WIDTH, GAME_BOARD_FALLING_POSITION_STEP, GAME_BOARD_START_FALLING_POSITION } from "../../config"
 import type { TPlayers } from "../../types"
+import { findFinalRow } from "../../utils"
 
 type TGameBoardProps = {
   rows?: number // Количество рядов
@@ -50,15 +51,7 @@ const GameBoard: FC<TGameBoardProps> = ({
     const newGrid = [...grid]
 
     // Определяем конечную строку для падения, учитывая наличие фишек в столбце
-    let finalRow: number | null = null
-
-    for (let row = 0; row < rows; row++) {
-      if (newGrid[row][column] === null) {
-        finalRow = row // Находим первую доступную ячейку для добавления фишки
-      } else {
-        break // Если ячейка занята, прекращаем поиск
-      }
-    }
+    const finalRow = findFinalRow(newGrid, column)
 
     if (finalRow !== null) {
       setFallingStone({ column, color: variant })
