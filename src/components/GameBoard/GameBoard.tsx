@@ -72,6 +72,7 @@ const GameBoard: FC<TGameBoardProps> = ({
           if (newPosition >= targetPosition) {
             cancelAnimationFrame(animationFrameId) // Останавливаем анимацию
             newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
+            console.log("проверка комбинаций, заполнения поля")
             setGrid(newGrid)
             setFallingStone(null) // Сбрасываем падающую фишку
             return null // Убираем позицию
