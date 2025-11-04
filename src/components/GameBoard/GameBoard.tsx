@@ -6,6 +6,7 @@ import GameBoardCell from "../GameBoardCell/GameBoardCell"
 import { GAME_BOARD_CELL_WIDTH, GAME_BOARD_FALLING_POSITION_STEP, GAME_BOARD_START_FALLING_POSITION } from "../../config"
 import type { TPlayers } from "../../types"
 import { checkBoardFull, checkWin, findFinalRow, isCellInWinCombination, type TWinInfo } from "../../utils"
+import type { TCurrentPlayersMove } from "../../App"
 
 type TGameBoardProps = {
   rows?: number // Количество рядов
@@ -15,11 +16,8 @@ type TGameBoardProps = {
   isVsComputer: boolean
   boardState: TGameBoardState
   setBoardStateHandler: (state: TGameBoardState) => void
-}
-
-type TCurrentPlayersMove = {
-  player1: boolean
-  player2: boolean
+  currentPlayersMove: TCurrentPlayersMove
+  setCurrentPlayersMove: (value: TCurrentPlayersMove) => void
 }
 
 export type TGameBoardState = "waiting" | "pending" | "win" | "draw"
@@ -32,14 +30,12 @@ const GameBoard: FC<TGameBoardProps> = ({
   isVsComputer,
   boardState,
   setBoardStateHandler,
+  currentPlayersMove,
+  setCurrentPlayersMove,
 }) => {
   const [grid, setGrid] = useState<(TVariantCell | null)[][]>(Array.from({ length: rows }, () => Array(columns).fill(null)))
   const [fallingStone, setFallingStone] = useState<{ column: number; color: TVariantCell } | null>(null)
   const [fallingPosition, setFallingPosition] = useState<number | null>(null)
-  const [currentPlayersMove, setCurrentPlayersMove] = useState<TCurrentPlayersMove>({
-    player1: true,
-    player2: false,
-  })
   const [winInfo, setWinInfo] = useState<TWinInfo | null>(null)
 
   useEffect(() => {
@@ -73,16 +69,18 @@ const GameBoard: FC<TGameBoardProps> = ({
           if (newPosition >= targetPosition) {
             cancelAnimationFrame(animationFrameId) // Останавливаем анимацию
             newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
-            console.log("проверка комбинаций, заполнения поля")
+            // console.log("проверка комбинаций, заполнения поля")
             const winInfo = checkWin(newGrid, 4, finalRow, column, variant, rows, columns)
 
             if (winInfo) {
               console.log("нашли победителя ->", winInfo)
               setWinInfo(winInfo)
+              setBoardStateHandler("win")
             }
 
             if (checkBoardFull(newGrid)) {
               console.log("игра окончена ничья ->")
+              setBoardStateHandler("draw")
             }
 
             setGrid(newGrid)

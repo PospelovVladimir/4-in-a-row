@@ -33,7 +33,7 @@ const GameCell: FC<TGameCell> = ({ variant, isWinningCell = false }) => {
   return (
     <div className="game-cell">
       <span className={`game-cell__flare ${isWinningCell ? "active" : ""}`}></span>
-      <img className="game-cell__img" src={stone} />
+      {stone && <img className="game-cell__img" src={stone} />}
     </div>
   )
 }

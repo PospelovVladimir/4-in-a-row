@@ -48,8 +48,9 @@
   }
 
   &__chip-list {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 5px;
   }
 
