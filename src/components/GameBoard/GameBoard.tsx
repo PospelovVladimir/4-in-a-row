@@ -5,7 +5,7 @@ import GameCell from "../GameCell/GameCell"
 import GameBoardCell from "../GameBoardCell/GameBoardCell"
 import { GAME_BOARD_CELL_WIDTH, GAME_BOARD_FALLING_POSITION_STEP, GAME_BOARD_START_FALLING_POSITION } from "../../config"
 import type { TPlayers } from "../../types"
-import { findFinalRow } from "../../utils"
+import { checkBoardFull, checkWin, findFinalRow, isCellInWinCombination, type TWinInfo } from "../../utils"
 
 type TGameBoardProps = {
   rows?: number // Количество рядов
@@ -40,6 +40,7 @@ const GameBoard: FC<TGameBoardProps> = ({
     player1: true,
     player2: false,
   })
+  const [winInfo, setWinInfo] = useState<TWinInfo | null>(null)
 
   useEffect(() => {
     if (!isGameActive) {
@@ -73,6 +74,17 @@ const GameBoard: FC<TGameBoardProps> = ({
             cancelAnimationFrame(animationFrameId) // Останавливаем анимацию
             newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
             console.log("проверка комбинаций, заполнения поля")
+            const winInfo = checkWin(newGrid, 4, finalRow, column, variant, rows, columns)
+
+            if (winInfo) {
+              console.log("нашли победителя ->", winInfo)
+              setWinInfo(winInfo)
+            }
+
+            if (checkBoardFull(newGrid)) {
+              console.log("игра окончена ничья ->")
+            }
+
             setGrid(newGrid)
             setFallingStone(null) // Сбрасываем падающую фишку
             return null // Убираем позицию
@@ -170,7 +182,16 @@ const GameBoard: FC<TGameBoardProps> = ({
         <div className="game-board__row" key={rowIndex}>
           {Array.from({ length: columns }).map((_, columnIndex) => {
             const cellVariant = grid[rowIndex][columnIndex]
-            return <GameBoardCell key={`${rowIndex}-${columnIndex}`} columnIndex={columnIndex} cellVariant={cellVariant} />
+            const isWinningCell = winInfo ? isCellInWinCombination(winInfo.winningPositions, rowIndex, columnIndex) : false
+
+            return (
+              <GameBoardCell
+                key={`${rowIndex}-${columnIndex}`}
+                columnIndex={columnIndex}
+                cellVariant={cellVariant}
+                isWinningCell={isWinningCell}
+              />
+            )
           })}
         </div>
       ))}

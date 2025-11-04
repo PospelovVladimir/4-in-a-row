@@ -5,9 +5,10 @@ export type TVariantCell = "red" | "blue" | "green" | "violet"
 
 type TGameCell = {
   variant: TVariantCell
+  isWinningCell?: boolean
 }
 
-const GameCell: FC<TGameCell> = ({ variant }) => {
+const GameCell: FC<TGameCell> = ({ variant, isWinningCell = false }) => {
   const [stone, setStone] = useState<string>("")
 
   const getStone = async (variant: TVariantCell) => {
@@ -31,7 +32,7 @@ const GameCell: FC<TGameCell> = ({ variant }) => {
 
   return (
     <div className="game-cell">
-      <span className="game-cell__flare"></span>
+      <span className={`game-cell__flare ${isWinningCell ? "active" : ""}`}></span>
       <img className="game-cell__img" src={stone} />
     </div>
   )

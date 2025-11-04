@@ -9,7 +9,7 @@ import type { TPlayers } from "./types"
 const App = () => {
   const [isGameActive, setIsGameActive] = useState(false)
   const [chooseChips, setChooseChips] = useState<TPlayers>({ player1: null, player2: null })
-  const [isVsComputer, setIsVsComputer] = useState(true)
+  const [isVsComputer, setIsVsComputer] = useState(false)
   /*  
   'waiting' игра не началась, 
   'pending', игра в процессе, 

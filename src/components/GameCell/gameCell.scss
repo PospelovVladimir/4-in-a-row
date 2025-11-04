@@ -23,6 +23,10 @@
     left: -150%;
     background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.4));
     animation: flareAnimation 3s infinite linear; // Время и тип анимации можно менять
+
+    &.active {
+      display: block;
+    }
   }
 }
 

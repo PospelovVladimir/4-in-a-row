@@ -29,7 +29,7 @@ export const findFinalRow = (grid: (TVariantCell | null)[][], column: number): n
   return null // Если столбец полон
 }
 
-type TWinInfo = {
+export type TWinInfo = {
   winnerColor: TVariantCell;
   winningPositions: { row: number; col: number }[];
 };
@@ -98,3 +98,19 @@ export const checkWin = (
   // Если ни в одном из направлений не найдено amountToWin фишки подряд, возвращаем null
   return null;
 }
+
+export const isCellInWinCombination = (
+  winCombination: { row: number; col: number }[],
+  currentRow: number,
+  currentCol: number
+): boolean => {
+
+  if (!winCombination || winCombination.length === 0) {
+    return false;
+  }
+
+  return winCombination.some(
+    (position) =>
+      position.row === currentRow && position.col === currentCol
+  );
+};
