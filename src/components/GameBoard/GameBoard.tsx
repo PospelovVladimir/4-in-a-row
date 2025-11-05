@@ -111,7 +111,7 @@ const GameBoard: FC<TGameBoardProps> = ({
 
   const handlerBoardClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!isGameActive || boardState === "waiting" || boardState === "win" || boardState === "draw" || fallingStone !== null) return
+      if (!isGameActive || boardState !== "pending" || fallingStone !== null) return
 
       const target = e.target as HTMLElement
       const gameBoardCellEl = target.closest(".game-board-cell")
@@ -140,16 +140,7 @@ const GameBoard: FC<TGameBoardProps> = ({
   )
 
   const makeComputerMove = useCallback(() => {
-    if (
-      !isGameActive ||
-      boardState === "waiting" ||
-      boardState === "win" ||
-      boardState === "draw" ||
-      fallingStone !== null ||
-      !currentPlayersMove.player2 ||
-      !isVsComputer
-    )
-      return
+    if (!isGameActive || boardState !== "pending" || fallingStone !== null || !currentPlayersMove.player2 || !isVsComputer) return
 
     console.log("pc")
 
@@ -183,8 +174,10 @@ const GameBoard: FC<TGameBoardProps> = ({
   }, [isGameActive, boardState, fallingStone, currentPlayersMove, chooseChips, placeStone, columns, grid, isVsComputer])
 
   useEffect(() => {
-    makeComputerMove()
-  }, [makeComputerMove, currentPlayersMove])
+    if (isGameActive && fallingStone === null && currentPlayersMove.player2 && isVsComputer && boardState === "pending") {
+      makeComputerMove()
+    }
+  }, [makeComputerMove, currentPlayersMove, isGameActive, fallingStone, isVsComputer, boardState])
 
   return (
     <div className="game-board" onClick={handlerBoardClick} style={{ opacity: isGameActive ? "1" : "0.7" }}>
