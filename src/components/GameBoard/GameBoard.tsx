@@ -42,6 +42,8 @@ const GameBoard: FC<TGameBoardProps> = ({
   useEffect(() => {
     if (!isGameActive) {
       setGrid(Array.from({ length: rows }, () => Array(columns).fill(null)))
+      setFallingStone(null);
+      setFallingPosition(null);
       setWinInfo(null)
 
       if (animationFrameRef.current) {
@@ -49,7 +51,7 @@ const GameBoard: FC<TGameBoardProps> = ({
         animationFrameRef.current = null
       }
     }
-  }, [isGameActive])
+  }, [isGameActive, rows, columns])
 
   useEffect(() => {
     return () => {
@@ -59,58 +61,66 @@ const GameBoard: FC<TGameBoardProps> = ({
     }
   }, [])
 
-  const placeStone = (column: number, variant: TVariantCell) => {
-    const newGrid = [...grid]
-
-    // Определяем конечную строку для падения, учитывая наличие фишек в столбце
-    const finalRow = findFinalRow(newGrid, column)
-
-    if (finalRow !== null) {
-      setFallingStone({ column, color: variant })
-      setFallingPosition(GAME_BOARD_START_FALLING_POSITION) // Начинаем выше экрана
-
-      const targetPosition = finalRow * GAME_BOARD_CELL_WIDTH // Вычисляем точную целевую позицию
-
-      const animateDrop = () => {
-        setFallingPosition((prev) => {
-          if (prev === null) return 0
-
-          const newPosition = prev + GAME_BOARD_FALLING_POSITION_STEP // Двигаем вниз на 15 пикселей
-
-          // останавливай анимацию. конечная позиция === с полетом камня
-          if (newPosition >= targetPosition) {
-            if (animationFrameRef.current) {
-              cancelAnimationFrame(animationFrameRef.current)
-              animationFrameRef.current = null
+  const placeStone = (column: number, variant: TVariantCell): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const newGrid = [...grid]
+  
+      // Определяем конечную строку для падения, учитывая наличие фишек в столбце
+      const finalRow = findFinalRow(newGrid, column)
+  
+      if (finalRow !== null) {
+        setFallingStone({ column, color: variant })
+        setFallingPosition(GAME_BOARD_START_FALLING_POSITION) // Начинаем выше экрана
+  
+        const targetPosition = finalRow * GAME_BOARD_CELL_WIDTH // Вычисляем точную целевую позицию
+  
+        const animateDrop = () => {
+          setFallingPosition((prev) => {
+            if (prev === null) return 0
+  
+            const newPosition = prev + GAME_BOARD_FALLING_POSITION_STEP // Двигаем вниз на 15 пикселей
+  
+            // останавливай анимацию. конечная позиция === с полетом камня
+            if (newPosition >= targetPosition) {
+              if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current)
+                animationFrameRef.current = null
+              }
+  
+              newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
+              const winInfo = checkWin(newGrid, 4, finalRow, column, variant, rows, columns)
+              const isCheckBoardFull = checkBoardFull(newGrid)
+              let isGameEnded = false;
+  
+              if (winInfo) {
+                setWinInfo(winInfo)
+                setTimeout(() => setBoardStateHandler("win"), 0)
+                isGameEnded = true
+              }
+  
+              if (isCheckBoardFull) {
+                setTimeout(() => setBoardStateHandler("draw"), 0)
+                isGameEnded = true
+              }
+  
+              setGrid(newGrid)
+              setFallingStone(null) // Сбрасываем падающую фишку
+  
+              resolve(isGameEnded)
+              return null // Убираем позицию
             }
-
-            newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
-            const winInfo = checkWin(newGrid, 4, finalRow, column, variant, rows, columns)
-
-            if (winInfo) {
-              setWinInfo(winInfo)
-              setTimeout(() => setBoardStateHandler("win"), 0)
-            }
-
-            if (checkBoardFull(newGrid)) {
-              setTimeout(() => setBoardStateHandler("draw"), 0)
-            }
-
-            setGrid(newGrid)
-            setFallingStone(null) // Сбрасываем падающую фишку
-            return null // Убираем позицию
-          }
-          animationFrameRef.current = requestAnimationFrame(animateDrop)
-          return newPosition
-        })
+            animationFrameRef.current = requestAnimationFrame(animateDrop)
+            return newPosition
+          })
+        }
+  
+        animationFrameRef.current = requestAnimationFrame(animateDrop) // Запускаем анимацию
       }
-
-      animationFrameRef.current = requestAnimationFrame(animateDrop) // Запускаем анимацию
-    }
+    })
   }
 
   const handlerBoardClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+   async (e: React.MouseEvent<HTMLDivElement>) => {
       if (!isGameActive || boardState !== "pending" || fallingStone !== null) return
 
       const target = e.target as HTMLElement
@@ -126,26 +136,48 @@ const GameBoard: FC<TGameBoardProps> = ({
 
       if (isNaN(clickedColumn) || clickedColumn < 0 || clickedColumn >= columns) return
 
-      if (currentPlayersMove.player1 && chooseChips.player1) {
-        console.log("user")
+      // if (currentPlayersMove.player1 && chooseChips.player1) {
+        // console.log("user")
 
-        placeStone(clickedColumn, chooseChips.player1)
-        setCurrentPlayersMove({ ...currentPlayersMove, player1: false, player2: true })
+      //   placeStone(clickedColumn, chooseChips.player1)
+      //   setCurrentPlayersMove({ ...currentPlayersMove, player1: false, player2: true })
+      // } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
+      //   placeStone(clickedColumn, chooseChips.player2)
+      //   setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
+      // }
+
+      // if (currentPlayersMove.player1 && chooseChips.player1) {
+      //   placeStone(clickedColumn, chooseChips.player1)
+      // } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
+      //   placeStone(clickedColumn, chooseChips.player2)
+      // }
+
+        if (currentPlayersMove.player1 && chooseChips.player1) {
+        const isGameEnded = await placeStone(clickedColumn, chooseChips.player1);
+
+        if (!isGameEnded) {
+          setCurrentPlayersMove({ player1: false, player2: true })
+        }
       } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
-        placeStone(clickedColumn, chooseChips.player2)
-        setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
+        const isGameEnded = await placeStone(clickedColumn, chooseChips.player2);
+
+        if (!isGameEnded) {
+          setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
+        }
       }
+  
+  
     },
     [isGameActive, boardState, placeStone, columns, fallingStone, currentPlayersMove, chooseChips]
   )
 
-  const makeComputerMove = useCallback(() => {
+  const makeComputerMove = useCallback(async () => {
     if (!isGameActive || boardState !== "pending" || fallingStone !== null || !currentPlayersMove.player2 || !isVsComputer) return
 
-    console.log("pc")
+    // console.log("pc")
 
     // Задержка перед ходом компьютера
-    setTimeout(() => {
+    setTimeout(async () => {
       // Выбираем случайный столбец
       let randomColumn: number
       do {
@@ -166,18 +198,32 @@ const GameBoard: FC<TGameBoardProps> = ({
       }
 
       // Ставим фишку в выбранный столбец
+      // if (chooseChips.player2) {
+      //   placeStone(randomColumn, chooseChips.player2)
+      //   setCurrentPlayersMove((prev) => ({ ...prev, player1: true, player2: false }))
+      // }
+
+      // if (chooseChips.player2) {
+      //   placeStone(randomColumn, chooseChips.player2)
+      // }
+
       if (chooseChips.player2) {
-        placeStone(randomColumn, chooseChips.player2)
-        setCurrentPlayersMove((prev) => ({ ...prev, player1: true, player2: false }))
+        const isGameEnded = await placeStone(randomColumn, chooseChips.player2)
+
+        if (!isGameEnded) {
+          setCurrentPlayersMove({ player1: true, player2: false })
+        }
       }
-    }, 500) // Задержка в 500 миллисекунд (0.5 секунды)
-  }, [isGameActive, boardState, fallingStone, currentPlayersMove, chooseChips, placeStone, columns, grid, isVsComputer])
+        
+    }, 500) // Задержка в 500 миллисекунд
+  }, [isGameActive, boardState, fallingStone, currentPlayersMove, chooseChips, placeStone, columns, grid, isVsComputer, ])
 
   useEffect(() => {
     if (isGameActive && fallingStone === null && currentPlayersMove.player2 && isVsComputer && boardState === "pending") {
       makeComputerMove()
     }
-  }, [makeComputerMove, currentPlayersMove, isGameActive, fallingStone, isVsComputer, boardState])
+    // destroy fallingStone  makeComputerMove
+  }, [ currentPlayersMove, isGameActive, isVsComputer, boardState])
 
   return (
     <div className="game-board" onClick={handlerBoardClick} style={{ opacity: isGameActive ? "1" : "0.7" }}>
