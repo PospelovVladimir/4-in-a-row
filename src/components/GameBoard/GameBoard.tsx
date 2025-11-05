@@ -1,4 +1,4 @@
-import { useState, type FC, useCallback, useEffect } from "react"
+import { useState, useRef, type FC, useCallback, useEffect } from "react"
 import "./gameBoard.scss"
 import type { TVariantCell } from "../GameCell/GameCell"
 import GameCell from "../GameCell/GameCell"
@@ -37,6 +37,7 @@ const GameBoard: FC<TGameBoardProps> = ({
   const [fallingStone, setFallingStone] = useState<{ column: number; color: TVariantCell } | null>(null)
   const [fallingPosition, setFallingPosition] = useState<number | null>(null)
   const [winInfo, setWinInfo] = useState<TWinInfo | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!isGameActive) {
@@ -57,9 +58,6 @@ const GameBoard: FC<TGameBoardProps> = ({
 
       const targetPosition = finalRow * GAME_BOARD_CELL_WIDTH // Вычисляем точную целевую позицию
 
-      // Используйте requestAnimationFrame:
-      let animationFrameId: number
-
       const animateDrop = () => {
         setFallingPosition((prev) => {
           if (prev === null) return 0
@@ -68,33 +66,33 @@ const GameBoard: FC<TGameBoardProps> = ({
 
           // останавливай анимацию. конечная позиция === с полетом камня
           if (newPosition >= targetPosition) {
-            cancelAnimationFrame(animationFrameId) // Останавливаем анимацию
+            if (animationFrameRef.current) {
+              cancelAnimationFrame(animationFrameRef.current)
+              animationFrameRef.current = null
+            }
+
             newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
-            // console.log("проверка комбинаций, заполнения поля")
             const winInfo = checkWin(newGrid, 4, finalRow, column, variant, rows, columns)
 
             if (winInfo) {
-              console.log("нашли победителя ->", winInfo)
               setWinInfo(winInfo)
-              setBoardStateHandler("win")
+              setTimeout(() => setBoardStateHandler("win"), 0)
             }
 
             if (checkBoardFull(newGrid)) {
-              console.log("игра окончена ничья ->")
-              setBoardStateHandler("draw")
+              setTimeout(() => setBoardStateHandler("draw"), 0)
             }
 
             setGrid(newGrid)
             setFallingStone(null) // Сбрасываем падающую фишку
             return null // Убираем позицию
           }
+          animationFrameRef.current = requestAnimationFrame(animateDrop)
           return newPosition
         })
-
-        animationFrameId = requestAnimationFrame(animateDrop)
       }
 
-      animationFrameId = requestAnimationFrame(animateDrop) // Запускаем анимацию
+      animationFrameRef.current = requestAnimationFrame(animateDrop) // Запускаем анимацию
     }
   }
 
