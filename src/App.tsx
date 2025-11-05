@@ -15,11 +15,6 @@ const App = () => {
   const [isGameActive, setIsGameActive] = useState(false)
   const [chooseChips, setChooseChips] = useState<TPlayers>({ player1: null, player2: null })
   const [isVsComputer, setIsVsComputer] = useState(true)
-  /*  
-  'waiting' игра не началась, 
-  'pending', игра в процессе, 
-  'win', есть победа какого-то игрока, 
-  'draw',  ничья. */
   const [boardState, setBoardState] = useState<TGameBoardState>("waiting")
   const [currentPlayersMove, setCurrentPlayersMove] = useState<TCurrentPlayersMove>({
     player1: true,
@@ -29,12 +24,6 @@ const App = () => {
   const setBoardStateHandler = (state: TGameBoardState) => {
     setBoardState(state)
   }
-
-  /* 
-  TODO
-  - убрать баг в игре против пк: если найдена выигрышная комбинация, пк после нее ходить не должен, а там срабатыывает доп ход
-      вероятно проблема в состояниях. (на момент срабатывания пк логики, он не получает свежее состояние доски)
-  */
 
   const gameActiveHandler = () => {
     if (!chooseChips.player1 && !isGameActive) return
