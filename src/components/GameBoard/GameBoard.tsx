@@ -41,6 +41,7 @@ const GameBoard: FC<TGameBoardProps> = ({
   useEffect(() => {
     if (!isGameActive) {
       setGrid(Array.from({ length: rows }, () => Array(columns).fill(null)))
+      setWinInfo(null)
     }
   }, [isGameActive])
 
