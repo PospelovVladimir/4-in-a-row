@@ -43,8 +43,21 @@ const GameBoard: FC<TGameBoardProps> = ({
     if (!isGameActive) {
       setGrid(Array.from({ length: rows }, () => Array(columns).fill(null)))
       setWinInfo(null)
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
+      }
     }
   }, [isGameActive])
+
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+    }
+  }, [])
 
   const placeStone = (column: number, variant: TVariantCell) => {
     const newGrid = [...grid]
