@@ -42,8 +42,8 @@ const GameBoard: FC<TGameBoardProps> = ({
   useEffect(() => {
     if (!isGameActive) {
       setGrid(Array.from({ length: rows }, () => Array(columns).fill(null)))
-      setFallingStone(null);
-      setFallingPosition(null);
+      setFallingStone(null)
+      setFallingPosition(null)
       setWinInfo(null)
 
       if (animationFrameRef.current) {
@@ -64,48 +64,48 @@ const GameBoard: FC<TGameBoardProps> = ({
   const placeStone = (column: number, variant: TVariantCell): Promise<boolean> => {
     return new Promise((resolve) => {
       const newGrid = [...grid]
-  
+
       // Определяем конечную строку для падения, учитывая наличие фишек в столбце
       const finalRow = findFinalRow(newGrid, column)
-  
+
       if (finalRow !== null) {
         setFallingStone({ column, color: variant })
         setFallingPosition(GAME_BOARD_START_FALLING_POSITION) // Начинаем выше экрана
-  
+
         const targetPosition = finalRow * GAME_BOARD_CELL_WIDTH // Вычисляем точную целевую позицию
-  
+
         const animateDrop = () => {
           setFallingPosition((prev) => {
             if (prev === null) return 0
-  
+
             const newPosition = prev + GAME_BOARD_FALLING_POSITION_STEP // Двигаем вниз на 15 пикселей
-  
+
             // останавливай анимацию. конечная позиция === с полетом камня
             if (newPosition >= targetPosition) {
               if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current)
                 animationFrameRef.current = null
               }
-  
+
               newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
               const winInfo = checkWin(newGrid, 4, finalRow, column, variant, rows, columns)
               const isCheckBoardFull = checkBoardFull(newGrid)
-              let isGameEnded = false;
-  
+              let isGameEnded = false
+
               if (winInfo) {
                 setWinInfo(winInfo)
                 setTimeout(() => setBoardStateHandler("win"), 0)
                 isGameEnded = true
               }
-  
+
               if (isCheckBoardFull) {
                 setTimeout(() => setBoardStateHandler("draw"), 0)
                 isGameEnded = true
               }
-  
+
               setGrid(newGrid)
               setFallingStone(null) // Сбрасываем падающую фишку
-  
+
               resolve(isGameEnded)
               return null // Убираем позицию
             }
@@ -113,14 +113,14 @@ const GameBoard: FC<TGameBoardProps> = ({
             return newPosition
           })
         }
-  
+
         animationFrameRef.current = requestAnimationFrame(animateDrop) // Запускаем анимацию
       }
     })
   }
 
   const handlerBoardClick = useCallback(
-   async (e: React.MouseEvent<HTMLDivElement>) => {
+    async (e: React.MouseEvent<HTMLDivElement>) => {
       if (!isGameActive || boardState !== "pending" || fallingStone !== null) return
 
       const target = e.target as HTMLElement
@@ -137,7 +137,7 @@ const GameBoard: FC<TGameBoardProps> = ({
       if (isNaN(clickedColumn) || clickedColumn < 0 || clickedColumn >= columns) return
 
       // if (currentPlayersMove.player1 && chooseChips.player1) {
-        // console.log("user")
+      // console.log("user")
 
       //   placeStone(clickedColumn, chooseChips.player1)
       //   setCurrentPlayersMove({ ...currentPlayersMove, player1: false, player2: true })
@@ -152,21 +152,19 @@ const GameBoard: FC<TGameBoardProps> = ({
       //   placeStone(clickedColumn, chooseChips.player2)
       // }
 
-        if (currentPlayersMove.player1 && chooseChips.player1) {
-        const isGameEnded = await placeStone(clickedColumn, chooseChips.player1);
+      if (currentPlayersMove.player1 && chooseChips.player1) {
+        const isGameEnded = await placeStone(clickedColumn, chooseChips.player1)
 
         if (!isGameEnded) {
           setCurrentPlayersMove({ player1: false, player2: true })
         }
       } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
-        const isGameEnded = await placeStone(clickedColumn, chooseChips.player2);
+        const isGameEnded = await placeStone(clickedColumn, chooseChips.player2)
 
         if (!isGameEnded) {
           setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
         }
       }
-  
-  
     },
     [isGameActive, boardState, placeStone, columns, fallingStone, currentPlayersMove, chooseChips]
   )
@@ -214,16 +212,15 @@ const GameBoard: FC<TGameBoardProps> = ({
           setCurrentPlayersMove({ player1: true, player2: false })
         }
       }
-        
     }, 500) // Задержка в 500 миллисекунд
-  }, [isGameActive, boardState, fallingStone, currentPlayersMove, chooseChips, placeStone, columns, grid, isVsComputer, ])
+  }, [isGameActive, boardState, fallingStone, currentPlayersMove, chooseChips, placeStone, columns, grid, isVsComputer])
 
   useEffect(() => {
     if (isGameActive && fallingStone === null && currentPlayersMove.player2 && isVsComputer && boardState === "pending") {
       makeComputerMove()
     }
     // destroy fallingStone  makeComputerMove
-  }, [ currentPlayersMove, isGameActive, isVsComputer, boardState])
+  }, [currentPlayersMove, isGameActive, isVsComputer, boardState])
 
   return (
     <div className="game-board" onClick={handlerBoardClick} style={{ opacity: isGameActive ? "1" : "0.7" }}>
