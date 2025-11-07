@@ -61,7 +61,7 @@ const GameBoard: FC<TGameBoardProps> = ({
     }
   }, [])
 
-  const placeStone = (column: number, variant: TVariantCell): Promise<boolean> => {
+  const placeStone = (column: number, variant: TVariantCell): Promise<TGameBoardState> => {
     return new Promise((resolve) => {
       const newGrid = [...grid]
 
@@ -90,23 +90,21 @@ const GameBoard: FC<TGameBoardProps> = ({
               newGrid[finalRow as number][column] = variant // Добавляем фишку в сетку
               const winInfo = checkWin(newGrid, 4, finalRow, column, variant, rows, columns)
               const isCheckBoardFull = checkBoardFull(newGrid)
-              let isGameEnded = false
+              let boardStateAfterCurrentOperation: TGameBoardState = "pending"
 
               if (winInfo) {
                 setWinInfo(winInfo)
-                setTimeout(() => setBoardStateHandler("win"), 0)
-                isGameEnded = true
+                boardStateAfterCurrentOperation = "win"
               }
 
               if (isCheckBoardFull) {
-                setTimeout(() => setBoardStateHandler("draw"), 0)
-                isGameEnded = true
+                boardStateAfterCurrentOperation = "draw"
               }
 
               setGrid(newGrid)
               setFallingStone(null) // Сбрасываем падающую фишку
 
-              resolve(isGameEnded)
+              resolve(boardStateAfterCurrentOperation)
               return null // Убираем позицию
             }
             animationFrameRef.current = requestAnimationFrame(animateDrop)
@@ -136,33 +134,33 @@ const GameBoard: FC<TGameBoardProps> = ({
 
       if (isNaN(clickedColumn) || clickedColumn < 0 || clickedColumn >= columns) return
 
-      // if (currentPlayersMove.player1 && chooseChips.player1) {
-      // console.log("user")
-
-      //   placeStone(clickedColumn, chooseChips.player1)
-      //   setCurrentPlayersMove({ ...currentPlayersMove, player1: false, player2: true })
-      // } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
-      //   placeStone(clickedColumn, chooseChips.player2)
-      //   setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
-      // }
-
-      // if (currentPlayersMove.player1 && chooseChips.player1) {
-      //   placeStone(clickedColumn, chooseChips.player1)
-      // } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
-      //   placeStone(clickedColumn, chooseChips.player2)
-      // }
-
       if (currentPlayersMove.player1 && chooseChips.player1) {
-        const isGameEnded = await placeStone(clickedColumn, chooseChips.player1)
+        const boardStateAfterCurrentOperation = await placeStone(clickedColumn, chooseChips.player1)
 
-        if (!isGameEnded) {
+        if (boardStateAfterCurrentOperation === "pending") {
           setCurrentPlayersMove({ player1: false, player2: true })
         }
-      } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
-        const isGameEnded = await placeStone(clickedColumn, chooseChips.player2)
 
-        if (!isGameEnded) {
-          setCurrentPlayersMove({ ...currentPlayersMove, player1: true, player2: false })
+        if (boardStateAfterCurrentOperation === "win") {
+          setBoardStateHandler("win")
+        }
+
+        if (boardStateAfterCurrentOperation === "draw") {
+          setBoardStateHandler("draw")
+        }
+      } else if (currentPlayersMove.player2 && chooseChips.player2 && !isVsComputer) {
+        const boardStateAfterCurrentOperation = await placeStone(clickedColumn, chooseChips.player2)
+
+        if (boardStateAfterCurrentOperation === "pending") {
+          setCurrentPlayersMove({ player1: true, player2: false })
+        }
+
+        if (boardStateAfterCurrentOperation === "win") {
+          setBoardStateHandler("win")
+        }
+
+        if (boardStateAfterCurrentOperation === "draw") {
+          setBoardStateHandler("draw")
         }
       }
     },
@@ -195,21 +193,19 @@ const GameBoard: FC<TGameBoardProps> = ({
         return
       }
 
-      // Ставим фишку в выбранный столбец
-      // if (chooseChips.player2) {
-      //   placeStone(randomColumn, chooseChips.player2)
-      //   setCurrentPlayersMove((prev) => ({ ...prev, player1: true, player2: false }))
-      // }
-
-      // if (chooseChips.player2) {
-      //   placeStone(randomColumn, chooseChips.player2)
-      // }
-
       if (chooseChips.player2) {
-        const isGameEnded = await placeStone(randomColumn, chooseChips.player2)
+        const boardStateAfterCurrentOperation = await placeStone(randomColumn, chooseChips.player2)
 
-        if (!isGameEnded) {
+        if (boardStateAfterCurrentOperation === "pending") {
           setCurrentPlayersMove({ player1: true, player2: false })
+        }
+
+        if (boardStateAfterCurrentOperation === "win") {
+          setBoardStateHandler("win")
+        }
+
+        if (boardStateAfterCurrentOperation === "draw") {
+          setBoardStateHandler("draw")
         }
       }
     }, 500) // Задержка в 500 миллисекунд
